@@ -1,0 +1,355 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --paper: #FAF8F3;
+  --paper-shadow: #E8E4DA;
+  --ink: #2B2B2B;
+  --ink-soft: #6B655F;
+  --stamp: #D6412C;
+  --stamp-dark: #B5341F;
+  --register: #3F7859;
+  --register-soft: #E4EFE8;
+  --line: #D8D2C6;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #EFEBE2;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.035) 1px, transparent 0);
+  background-size: 20px 20px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px 64px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* ---- Receipt card, the signature element ---- */
+.receipt {
+  background: var(--paper);
+  position: relative;
+  padding: 36px 28px 32px;
+  box-shadow: 0 18px 40px -12px rgba(43,43,43,0.25);
+}
+
+.receipt::before,
+.receipt::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 10px;
+  background:
+    radial-gradient(circle at 10px 0, transparent 6px, var(--paper) 6.5px) repeat-x;
+  background-size: 20px 20px;
+}
+.receipt::before { top: -1px; background-position: 0 -10px;
+  background: radial-gradient(circle at 10px 10px, #EFEBE2 6px, transparent 6.5px) repeat-x;
+  background-size: 20px 10px; top: 0; }
+.receipt::after {
+  bottom: 0;
+  background: radial-gradient(circle at 10px 0, #EFEBE2 6px, transparent 6.5px) repeat-x;
+  background-size: 20px 10px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 4px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  line-height: 1.15;
+}
+
+.sub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin: 0 0 24px;
+}
+
+.divider {
+  border: none;
+  border-top: 1.5px dashed var(--line);
+  margin: 20px 0;
+}
+
+/* ---- Form elements ---- */
+label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  background: #fff;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 18px;
+}
+input:focus {
+  outline: 2px solid var(--stamp);
+  outline-offset: 1px;
+  border-color: var(--stamp);
+}
+input[type="text"]::placeholder { color: #B7B0A5; }
+
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+.field-row > div { flex: 1; }
+
+/* ---- Item row (create + select pages) ---- */
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+}
+.item-row input[type="text"] { margin-bottom: 0; flex: 2; }
+.item-row input[type="number"] { margin-bottom: 0; flex: 1; text-align: right; }
+.item-row .remove-btn {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 6px;
+}
+.item-row .remove-btn:hover { color: var(--stamp); }
+
+.add-item-btn {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: 1.5px dashed var(--line);
+  border-radius: 4px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+.add-item-btn:hover { border-color: var(--stamp); color: var(--stamp); }
+
+/* ---- Buttons ---- */
+.btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 14px;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.08s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--stamp); color: #fff; }
+.btn-primary:hover { background: var(--stamp-dark); }
+.btn-secondary {
+  background: none;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  margin-top: 10px;
+}
+.btn-secondary:hover { background: var(--ink); color: #fff; }
+
+.error-msg {
+  color: var(--stamp);
+  font-size: 13px;
+  margin: -10px 0 16px;
+  font-family: var(--font-mono);
+  display: none;
+}
+.error-msg.show { display: block; }
+
+/* ---- Landing choices ---- */
+.choice-stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---- Room code display ---- */
+.room-code-box {
+  text-align: center;
+  padding: 20px;
+  background: var(--register-soft);
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+.room-code {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--register);
+}
+.room-code-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* ---- Selection list ---- */
+.select-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 4px;
+  border-bottom: 1px dashed var(--line);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: background 0.1s ease;
+}
+.select-item:hover { background: rgba(0,0,0,0.02); }
+.select-item.mine { background: var(--register-soft); }
+.select-item .name { flex: 1; }
+.select-item .price { color: var(--ink-soft); margin-right: 12px; }
+.select-item .who {
+  font-size: 11px;
+  color: var(--ink-soft);
+  max-width: 110px;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-item.mine .who { color: var(--register); }
+
+.people-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.person-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--ink-soft);
+}
+
+/* ---- Final bill ---- */
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  padding: 6px 0;
+  color: var(--ink-soft);
+}
+.total-row.grand {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 17px;
+  padding-top: 14px;
+  margin-top: 8px;
+  border-top: 1.5px dashed var(--line);
+}
+
+.person-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+}
+.person-total .name { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+.person-total .amount { font-family: var(--font-mono); font-size: 16px; color: var(--register); }
+
+.stamp-total {
+  text-align: center;
+  margin: 24px 0;
+  transform: rotate(-2deg);
+}
+.stamp-total .amount {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  color: var(--stamp);
+  border: 3px solid var(--stamp);
+  border-radius: 8px;
+  padding: 6px 20px;
+}
+
+.warning-box {
+  background: #FDF1EC;
+  border: 1px dashed var(--stamp);
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--stamp-dark);
+  margin-bottom: 20px;
+}
+
+.copy-link {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.copy-link input {
+  margin-bottom: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: #F2EFE8;
+}
+.copy-link button {
+  padding: 0 16px;
+  border: 1.5px solid var(--ink);
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+footer.hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 16px;
+}
+
+@media (max-width: 400px) {
+  .receipt { padding: 28px 18px 26px; }
+  h1 { font-size: 24px; }
+}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Table for however many</p>
+<h1>Smart Bill Splitter</h1>
+<p class="sub">No more "just Venmo me later." Everyone picks what they had, the math does itself.</p>
+
+<hr class="divider">
+
+<div class="choice-stack">
+  <a class="btn btn-primary" href="{{ url_for('create_room') }}">Start a new bill</a>
+  <a class="btn btn-secondary" href="{{ url_for('join_room') }}">Join with a room code</a>
+</div>
+{% endblock %}

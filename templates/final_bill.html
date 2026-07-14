@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Room {{ code }}</p>
+<h1>The final bill</h1>
+<p class="sub">Updates live as people finish selecting.</p>
+
+<div id="warning-container"></div>
+
+<div id="breakdown-container">
+  <p class="sub">crunching numbers&hellip;</p>
+</div>
+
+<div class="stamp-total" id="stamp-container" style="display:none">
+  <div class="amount" id="grand-total">AED 0</div>
+</div>
+
+<hr class="divider">
+
+<div id="totals-list"></div>
+
+<hr class="divider">
+
+<p class="eyebrow">Settle up</p>
+<p class="sub" id="settle-sub">figuring out the fewest payments needed&hellip;</p>
+<div id="settlements-list"></div>
+
+<a class="btn btn-secondary" href="{{ url_for('select_items', code=code) }}">Back to items</a>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CODE = "{{ code }}";
+
+function render(data) {
+  const warningEl = document.getElementById('warning-container');
+  if (data.unclaimed_items.length > 0) {
+    warningEl.innerHTML = `<div class="warning-box">⚠ Nobody claimed: ${data.unclaimed_items.map(escapeHtml).join(', ')}. Someone forgot to tap their item.</div>`;
+  } else {
+    warningEl.innerHTML = '';
+  }
+
+  document.getElementById('breakdown-container').innerHTML = `
+    <div class="total-row"><span>Subtotal</span><span>AED ${data.subtotal.toFixed(2)}</span></div>
+    <div class="total-row"><span>Tax</span><span>AED ${data.tax.toFixed(2)}</span></div>
+    <div class="total-row"><span>Tip</span><span>AED ${data.tip.toFixed(2)}</span></div>
+    <div class="total-row grand"><span>Total</span><span>AED ${data.grand_total.toFixed(2)}</span></div>
+  `;
+
+  document.getElementById('grand-total').textContent = `AED ${data.grand_total.toFixed(2)}`;
+  document.getElementById('stamp-container').style.display = 'block';
+
+  document.getElementById('totals-list').innerHTML = data.breakdown.map(p => `
+    <div class="person-total">
+      <span class="name">${escapeHtml(p.name)}</span>
+      <span class="amount">AED ${p.total.toFixed(2)}</span>
+    </div>
+  `).join('');
+
+  const settleSub = document.getElementById('settle-sub');
+  const settleList = document.getElementById('settlements-list');
+  if (data.total_fronted < 0.01) {
+    settleSub.textContent = "Nobody's reported paying anything upfront — head back to the items page and log it if you covered the check.";
+    settleList.innerHTML = '';
+  } else if (data.settlements.length === 0) {
+    settleSub.textContent = "Everyone's even. Nobody owes anybody.";
+    settleList.innerHTML = '';
+  } else {
+    settleSub.textContent = `${data.settlements.length} payment${data.settlements.length > 1 ? 's' : ''} settles the whole group.`;
+    settleList.innerHTML = data.settlements.map(s => `
+      <div class="person-total">
+        <span class="name">${escapeHtml(s.from)} → ${escapeHtml(s.to)}</span>
+        <span class="amount">AED ${s.amount.toFixed(2)}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+async function fetchBill() {
+  try {
+    const res = await fetch(`/api/room/${CODE}/bill`);
+    const data = await res.json();
+    if (!data.error) render(data);
+  } catch (e) { /* keep old view on transient network hiccup */ }
+}
+
+fetchBill();
+setInterval(fetchBill, 3000);
+</script>
+{% endblock %}

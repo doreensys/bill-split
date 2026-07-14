@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Step 1 of 1</p>
+<h1>Start a bill</h1>
+<p class="sub">Add what's on the receipt. You can always fix it later.</p>
+
+<label for="host_name">Your name</label>
+<input type="text" id="host_name" placeholder="Doreen">
+
+<label>Items</label>
+<div id="items-list">
+  <div class="item-row">
+    <input type="text" class="item-name" placeholder="Pizza">
+    <input type="number" class="item-price" placeholder="AED" min="0" step="0.01">
+    <button type="button" class="remove-btn" onclick="removeRow(this)">&times;</button>
+  </div>
+</div>
+<button type="button" class="add-item-btn" id="add-item">+ add item</button>
+
+<div class="field-row">
+  <div>
+    <label for="tax">Tax (AED)</label>
+    <input type="number" id="tax" placeholder="0" min="0" step="0.01">
+  </div>
+  <div>
+    <label for="tip">Tip (AED)</label>
+    <input type="number" id="tip" placeholder="0" min="0" step="0.01">
+  </div>
+</div>
+
+<p class="error-msg" id="error"></p>
+
+<button class="btn btn-primary" id="submit-btn">Create room</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function removeRow(btn) {
+  const list = document.getElementById('items-list');
+  if (list.children.length > 1) btn.closest('.item-row').remove();
+}
+
+document.getElementById('add-item').addEventListener('click', () => {
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <input type="text" class="item-name" placeholder="Item">
+    <input type="number" class="item-price" placeholder="AED" min="0" step="0.01">
+    <button type="button" class="remove-btn" onclick="removeRow(this)">&times;</button>`;
+  document.getElementById('items-list').appendChild(row);
+});
+
+document.getElementById('submit-btn').addEventListener('click', async () => {
+  const errorEl = document.getElementById('error');
+  errorEl.classList.remove('show');
+
+  const hostName = document.getElementById('host_name').value.trim();
+  const items = [];
+  document.querySelectorAll('.item-row').forEach(row => {
+    const name = row.querySelector('.item-name').value.trim();
+    const price = parseFloat(row.querySelector('.item-price').value);
+    if (name && !isNaN(price) && price >= 0) items.push({ name, price });
+  });
+  const tax = document.getElementById('tax').value || 0;
+  const tip = document.getElementById('tip').value || 0;
+
+  if (!hostName) { errorEl.textContent = "Enter your name first."; errorEl.classList.add('show'); return; }
+  if (items.length === 0) { errorEl.textContent = "Add at least one item."; errorEl.classList.add('show'); return; }
+
+  const res = await fetch('/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ host_name: hostName, items, tax, tip })
+  });
+  const data = await res.json();
+  if (data.error) { errorEl.textContent = data.error; errorEl.classList.add('show'); return; }
+  window.location.href = data.redirect;
+});
+</script>
+{% endblock %}

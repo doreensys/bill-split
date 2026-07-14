@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Got a code?</p>
+<h1>Join a bill</h1>
+<p class="sub">Ask whoever's holding the receipt for the room code.</p>
+
+<label for="room_id">Room code</label>
+<input type="text" id="room_id" placeholder="ABCD12" value="{{ prefill }}" style="text-transform:uppercase">
+
+<label for="name">Your name</label>
+<input type="text" id="name" placeholder="Sarah">
+
+<p class="error-msg" id="error"></p>
+
+<button class="btn btn-primary" id="join-btn">Join room</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('join-btn').addEventListener('click', async () => {
+  const errorEl = document.getElementById('error');
+  errorEl.classList.remove('show');
+
+  const code = document.getElementById('room_id').value.trim().toUpperCase();
+  const name = document.getElementById('name').value.trim();
+
+  if (!code) { errorEl.textContent = "Enter the room code."; errorEl.classList.add('show'); return; }
+  if (!name) { errorEl.textContent = "Enter your name."; errorEl.classList.add('show'); return; }
+
+  const res = await fetch('/join', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ room_id: code, name })
+  });
+  const data = await res.json();
+  if (data.error) { errorEl.textContent = data.error; errorEl.classList.add('show'); return; }
+  window.location.href = data.redirect;
+});
+
+document.getElementById('room_id').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('join-btn').click();
+});
+</script>
+{% endblock %}

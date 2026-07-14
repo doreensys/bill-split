@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="eyebrow">Hey {{ name }}</p>
+<h1>Pick what you had</h1>
+<p class="sub">Tap each item you ordered. Shared something? Everyone who had it should tap it too.</p>
+
+<div class="room-code-box">
+  <div class="room-code">{{ code }}</div>
+  <div class="room-code-label">room code &middot; share this to invite people</div>
+</div>
+
+<div class="people-bar" id="people-bar"></div>
+
+<hr class="divider">
+
+<div id="items-container">
+  <p class="sub">loading items&hellip;</p>
+</div>
+
+<hr class="divider">
+
+<label for="paid-input">Did you personally pay anything upfront? (e.g. put the whole bill or part of it on your card)</label>
+<div class="field-row">
+  <div style="flex:2">
+    <input type="number" id="paid-input" placeholder="0" min="0" step="0.01">
+  </div>
+  <div style="flex:1">
+    <button type="button" class="btn btn-secondary" id="save-paid-btn" style="margin-top:0">Save</button>
+  </div>
+</div>
+<div id="paid-summary" class="sub" style="margin-top:-8px"></div>
+
+<hr class="divider">
+
+<a class="btn btn-primary" href="{{ url_for('final_bill', code=code) }}">See final bill</a>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const CODE = "{{ code }}";
+const MY_ID = {{ user_id }};
+
+function render(state) {
+  const peopleBar = document.getElementById('people-bar');
+  peopleBar.innerHTML = state.users.map(u =>
+    `<span class="person-chip">${u.user_id === MY_ID ? '⭐ ' : ''}${escapeHtml(u.name)}</span>`
+  ).join('');
+
+  const userMap = {};
+  state.users.forEach(u => userMap[u.user_id] = u.name);
+
+  const paidSummary = state.users
+    .filter(u => u.amount_paid > 0)
+    .map(u => `${u.user_id === MY_ID ? 'you' : escapeHtml(u.name)} fronted AED ${u.amount_paid.toFixed(2)}`)
+    .join(' · ');
+  document.getElementById('paid-summary').textContent = paidSummary || "nobody's reported paying anything upfront yet";
+
+  const me = state.users.find(u => u.user_id === MY_ID);
+  if (me && document.activeElement.id !== 'paid-input') {
+    document.getElementById('paid-input').value = me.amount_paid > 0 ? me.amount_paid : '';
+  }
+
+  const container = document.getElementById('items-container');
+  container.innerHTML = state.items.map(item => {
+    const mine = item.selected_by.includes(MY_ID);
+    const names = item.selected_by.map(id => userMap[id] || '?').join(', ');
+    return `
+      <div class="select-item ${mine ? 'mine' : ''}" data-item-id="${item.item_id}">
+        <span class="name">${mine ? '✓ ' : ''}${escapeHtml(item.name)}</span>
+        <span class="price">AED ${item.price.toFixed(2)}</span>
+        <span class="who">${names ? escapeHtml(names) : '—'}</span>
+      </div>`;
+  }).join('');
+
+  document.querySelectorAll('.select-item').forEach(el => {
+    el.addEventListener('click', () => toggleItem(el.dataset.itemId));
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+async function toggleItem(itemId) {
+  await fetch(`/api/room/${CODE}/toggle`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item_id: parseInt(itemId) })
+  });
+  fetchState();
+}
+
+async function fetchState() {
+  try {
+    const res = await fetch(`/api/room/${CODE}/state`);
+    const state = await res.json();
+    if (!state.error) render(state);
+  } catch (e) { /* keep old view on transient network hiccup */ }
+}
+
+document.getElementById('save-paid-btn').addEventListener('click', async () => {
+  const val = parseFloat(document.getElementById('paid-input').value) || 0;
+  await fetch(`/api/room/${CODE}/paid`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: val })
+  });
+  fetchState();
+});
+
+fetchState();
+setInterval(fetchState, 3000); // poll instead of websockets — simpler, good enough for a table of friends
+</script>
+{% endblock %}
