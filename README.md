@@ -13,5 +13,6 @@ the fewest payments possible.
 3. Anyone who fronted money (put the bill on their card) logs how much.
 4. App computes shares and settles the group up.
 
-## Link to try it out!
-Open `http://localhost:5000`
+
+## Demo Video
+https://github.com/user-attachments/assets/9d88bac5-3a50-43de-a030-b9b56e999b9d
